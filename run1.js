@@ -1347,17 +1347,15 @@ var DefineStep = function (_Statement) {
 
 					switch (param['datatype']) {
 						case '整数':
-							param['datatype'] = IntValue;
-							break;
+							param['datatype'] = IntValue;break;
 						case '実数':
-							param['datatype'] = FloatValue;
-							break;
+							param['datatype'] = FloatValue;break;
 						case '文字列':
-							param['datatype'] = StringValue;
-							break;
+							param['datatype'] = StringValue;break;
 						case '真偽':
-							param['datatype'] = BooleanValue;
-							break;
+							param['datatype'] = BooleanValue;break;
+						case '配列':
+							param['datatype'] = ArrayValue;break;
 					}
 				}
 			} catch (err) {
@@ -1391,31 +1389,9 @@ var DefineStep = function (_Statement) {
 		value: function exec(args) {
 			var vt = new varTable();
 			var params = this.params;
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
-
-			try {
-				for (var _iterator2 = params[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var param = _step2.value;
-
-					vt.vars[param['varname']] = args.pop().getValue();
-				}
-			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
-					}
-				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
-					}
-				}
+			for (var i = 0; i < params.length; i++) {
+				vt.vars[params[i]['varname']] = args[i].getValue();
 			}
-
 			varTables.push(vt);
 			stack.push({ statementlist: this.statementlist, index: 0 });
 		}
@@ -1438,6 +1414,16 @@ var CallStep = function (_Statement2) {
 	}
 
 	_createClass(CallStep, [{
+		key: "isCorrectDatatype",
+		value: function isCorrectDatatype(i) {
+			var fn = this.funcName;
+			var args = this.args;
+			if (args[i].getValue() instanceof myFuncs[fn].params[i]['datatype'] || args[i].getValue() instanceof ArrayValue && myFuncs[fn].params[i]['isArray']) {
+				return true;
+			}
+			return false;
+		}
+	}, {
 		key: "run",
 		value: function run(index) {
 			var fn = this.funcName;
@@ -1449,14 +1435,11 @@ var CallStep = function (_Statement2) {
 				throw new RuntimeError(this.first_line, '手続き ' + fn + ' を呼び出すための引数の数が正しくありません');
 			}
 			for (var i = 0; i < args.length; i++) {
-				if (!(args[i].getValue() instanceof myFuncs[fn].params[i]['datatype'])) {
+				//printDatatype(args[i].getValue());
+				//if (!(args[i].getValue() instanceof myFuncs[fn].params[i]['datatype'])) {
+				if (!this.isCorrectDatatype(i)) {
 					throw new RuntimeError(this.first_line, '手続き ' + fn + ' を呼び出すための引数の型が正しくありません');
 				}
-				/*
-    if (!(this.args[i].isArray != myFuncs[this.funcName].params[i].isArray)) {
-      throw new RuntimeError(this.first_line, '手続き '+funcName+' を呼び出すための引数の型が正しくありません');
-    }
-    */
 			}
 			myFuncs[fn].exec(args);
 			throw this;
@@ -1465,6 +1448,13 @@ var CallStep = function (_Statement2) {
 
 	return CallStep;
 }(Statement);
+
+// デバッグ用
+
+
+function printDatatype(v) {
+	if (v instanceof IntValue) console.log("v: IntValue");else if (v instanceof FloatValue) console.log("v: FloatValue");else if (v instanceof StringValue) console.log("v: StringValue");else if (v instanceof BooleanValue) console.log("v: BooleanValue");else if (v instanceof ArrayValue) console.log("v: ArrayValue");else console.log("v: Unknown");
+}
 
 var ExitStatement = function (_Statement3) {
 	_inherits(ExitStatement, _Statement3);
@@ -1507,40 +1497,36 @@ var DefineFunction = function (_Statement4) {
 		if (params == null) {
 			_this30.params = [];
 		} else {
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
 
 			try {
-				for (var _iterator3 = params[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var param = _step3.value;
+				for (var _iterator2 = params[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var param = _step2.value;
 
 					switch (param['datatype']) {
 						case '整数':
-							param['datatype'] = IntValue;
-							break;
+							param['datatype'] = IntValue;break;
 						case '実数':
-							param['datatype'] = FloatValue;
-							break;
+							param['datatype'] = FloatValue;break;
 						case '文字列':
-							param['datatype'] = StringValue;
-							break;
+							param['datatype'] = StringValue;break;
 						case '真偽':
-							param['datatype'] = BooleanValue;
-							break;
+							param['datatype'] = BooleanValue;break;
 					}
 				}
 			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion3 && _iterator3.return) {
-						_iterator3.return();
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
 					}
 				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
+					if (_didIteratorError2) {
+						throw _iteratorError2;
 					}
 				}
 			}
@@ -1562,41 +1548,37 @@ var DefineFunction = function (_Statement4) {
 		value: function exec(args) {
 			switch (this.returnDatatype) {
 				case '整数':
-					returnTypes.push(IntValue);
-					break;
+					returnTypes.push(IntValue);break;
 				case '実数':
-					returnTypes.push(FloatValue);
-					break;
+					returnTypes.push(FloatValue);break;
 				case '文字列':
-					returnTypes.push(StringValue);
-					break;
+					returnTypes.push(StringValue);break;
 				case '真偽':
-					returnTypes.push(BooleanValue);
-					break;
+					returnTypes.push(BooleanValue);break;
 			}
 			var vt = new varTable();
 			var params = this.params;
-			var _iteratorNormalCompletion4 = true;
-			var _didIteratorError4 = false;
-			var _iteratorError4 = undefined;
+			var _iteratorNormalCompletion3 = true;
+			var _didIteratorError3 = false;
+			var _iteratorError3 = undefined;
 
 			try {
-				for (var _iterator4 = params[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-					var param = _step4.value;
+				for (var _iterator3 = params[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					var param = _step3.value;
 
 					vt.vars[param['varname']] = args.pop().getValue();
 				}
 			} catch (err) {
-				_didIteratorError4 = true;
-				_iteratorError4 = err;
+				_didIteratorError3 = true;
+				_iteratorError3 = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion4 && _iterator4.return) {
-						_iterator4.return();
+					if (!_iteratorNormalCompletion3 && _iterator3.return) {
+						_iterator3.return();
 					}
 				} finally {
-					if (_didIteratorError4) {
-						throw _iteratorError4;
+					if (_didIteratorError3) {
+						throw _iteratorError3;
 					}
 				}
 			}
@@ -1635,9 +1617,6 @@ var ReturnStatement = function (_Statement5) {
 
 	return ReturnStatement;
 }(Statement);
-
-/******************************************************* 追加ここまで *************************************************/
-
 
 var DefinitionStatement = function (_Statement6) {
 	_inherits(DefinitionStatement, _Statement6);
@@ -2452,7 +2431,6 @@ function run() {
 					stack[depth++].index = index;
 					index = 0;
 				} else if (e instanceof CallStep) {
-					console.log('CallStep Exception');
 					stack[depth++].index = index + 1;
 					index = 0;
 				} else if (e instanceof ReturnStatement || e instanceof ExitStatement) {

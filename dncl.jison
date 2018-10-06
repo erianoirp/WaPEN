@@ -204,10 +204,10 @@ args
 	;
 
 parameters
-	: parameters 'COMMA' PrimitiveDatatype IDENTIFIER         {$$ = $1.concat({'varname':$4, 'datatype':$3, 'isArray': false});}
-	| parameters 'COMMA' PrimitiveDatatype IDENTIFIER '[' ']' {$$ = $1.concat({'varname':$4, 'datatype':$3, 'isArray': true });}
-	| PrimitiveDatatype IDENTIFIER         {$$ = [{'varname':$2, 'datatype':$1, 'isArray': false}];}
-	| PrimitiveDatatype IDENTIFIER '[' ']' {$$ = [{'varname':$2, 'datatype':$1, 'isArray': true }];}
+	: parameters 'COMMA' PrimitiveDatatype IDENTIFIER         {$$ = $1.concat({'varname':$4, 'datatype':$3,     'isArray': false});}
+	| parameters 'COMMA' PrimitiveDatatype IDENTIFIER '[' ']' {$$ = $1.concat({'varname':$4, 'datatype':'配列', 'isArray': true });}
+	| PrimitiveDatatype IDENTIFIER         {$$ = [{'varname':$2, 'datatype':$1,     'isArray': false}];}
+	| PrimitiveDatatype IDENTIFIER '[' ']' {$$ = [{'varname':$2, 'datatype':'配列', 'isArray': true }];}
 	;
 
 statementlist

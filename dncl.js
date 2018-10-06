@@ -192,16 +192,16 @@ case 38: case 127:
  this.$ = [];
 break;
 case 39:
-this.$ = $$[$0-3].concat({'varname':$$[$0], 'datatype':$$[$0-1], 'isArray': false});
+this.$ = $$[$0-3].concat({'varname':$$[$0], 'datatype':$$[$0-1],     'isArray': false});
 break;
 case 40:
-this.$ = $$[$0-5].concat({'varname':$$[$0-2], 'datatype':$$[$0-3], 'isArray': true });
+this.$ = $$[$0-5].concat({'varname':$$[$0-2], 'datatype':'配列', 'isArray': true });
 break;
 case 41:
-this.$ = [{'varname':$$[$0], 'datatype':$$[$0-1], 'isArray': false}];
+this.$ = [{'varname':$$[$0], 'datatype':$$[$0-1],     'isArray': false}];
 break;
 case 42:
-this.$ = [{'varname':$$[$0-2], 'datatype':$$[$0-3], 'isArray': true }];
+this.$ = [{'varname':$$[$0-2], 'datatype':'配列', 'isArray': true }];
 break;
 case 43:
  if($$[$0] != null) this.$ = $$[$0-1].concat($$[$0]);
