@@ -1211,10 +1211,19 @@ var CallFunction = function (_Value25) {
 	}
 
 	_createClass(CallFunction, [{
+		key: "isCorrectDatatype",
+		value: function isCorrectDatatype(i) {
+			var fn = this.value.funcname;
+			var args = this.value.parameter;
+			if (args[i].getValue() instanceof myFuncs[fn].params[i]['datatype'] || args[i].getValue() instanceof ArrayValue && myFuncs[fn].params[i]['isArray']) {
+				return true;
+			}
+			return false;
+		}
+	}, {
 		key: "getValue",
 		value: function getValue() {
 			if (this.returnValue != undefined) {
-				console.log("this.returnValue: " + this.returnValue.value);
 				return this.returnValue;
 			}
 			var func = this.value.funcname,
@@ -1227,14 +1236,9 @@ var CallFunction = function (_Value25) {
 				throw new RuntimeError(this.first_line, '関数 ' + func + ' を呼び出すための引数の数が正しくありません');
 			}
 			for (var i = 0; i < param.length; i++) {
-				if (!(param[i].getValue() instanceof myFuncs[func].params[i]['datatype'])) {
+				if (!this.isCorrectDatatype(i)) {
 					throw new RuntimeError(this.first_line, '関数 ' + func + ' を呼び出すための引数の型が正しくありません');
 				}
-				/*
-    	 if (!(this.args[i].isArray != myFuncs[this.funcName].params[i].isArray)) {
-    	 throw new RuntimeError(this.first_line, '手続き '+funcName+' を呼び出すための引数の型が正しくありません');
-    	 }
-    	 */
 			}
 			myFuncs[func].exec(param);
 			watingReturns.push(this);
@@ -1514,6 +1518,8 @@ var DefineFunction = function (_Statement4) {
 							param['datatype'] = StringValue;break;
 						case '真偽':
 							param['datatype'] = BooleanValue;break;
+						case '配列':
+							param['datatype'] = ArrayValue;break;
 					}
 				}
 			} catch (err) {
@@ -1558,31 +1564,9 @@ var DefineFunction = function (_Statement4) {
 			}
 			var vt = new varTable();
 			var params = this.params;
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
-
-			try {
-				for (var _iterator3 = params[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var param = _step3.value;
-
-					vt.vars[param['varname']] = args.pop().getValue();
-				}
-			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion3 && _iterator3.return) {
-						_iterator3.return();
-					}
-				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
-					}
-				}
+			for (var i = 0; i < params.length; i++) {
+				vt.vars[params[i]['varname']] = args[i].getValue();
 			}
-
 			varTables.push(vt);
 			stack.push({ statementlist: this.statementlist, index: 0 });
 		}
@@ -1610,7 +1594,7 @@ var ReturnStatement = function (_Statement5) {
 				watingReturns.pop().returnValue = this.value.getValue();
 				throw this;
 			} else {
-				throw new RuntimeError(this.first_line, '数の戻り値が一致していません');
+				throw new RuntimeError(this.first_line, '戻り値の型が一致していません');
 			}
 		}
 	}]);

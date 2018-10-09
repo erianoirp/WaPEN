@@ -986,33 +986,37 @@ var definedFunction = {
 class CallFunction extends Value
 {
 	constructor(funcname, parameter, loc){super({funcname: funcname, parameter:parameter}, loc);}
+  isCorrectDatatype(i) {
+    const fn = this.value.funcname;
+    const args = this.value.parameter;
+    if ( args[i].getValue() instanceof myFuncs[fn].params[i]['datatype']
+      || args[i].getValue() instanceof ArrayValue && myFuncs[fn].params[i]['isArray']
+    ) {
+      return true;
+    }
+    return false;
+  }
 	getValue()
 	{
-		if (this.returnValue != undefined) {
-			console.log(`this.returnValue: ${this.returnValue.value}`);
-			return this.returnValue;
-		}
+    if (this.returnValue != undefined) {
+      return this.returnValue;
+    }
 		const func = this.value.funcname, param = this.value.parameter;
 		if(definedFunction[func]) return definedFunction[func].exec(param, this.loc);
-		if (myFuncs[func] == undefined) {
-			throw new RuntimeError(this.first_line, func + "という関数はありません");
-		}
-		if (myFuncs[func].params.length != param.length) {
-			throw new RuntimeError(this.first_line, '関数 '+func+' を呼び出すための引数の数が正しくありません');
-		}
-		for (let i=0; i<param.length; i++) {
-			if (!(param[i].getValue() instanceof myFuncs[func].params[i]['datatype'])) {
-				throw new RuntimeError(this.first_line, '関数 '+func+' を呼び出すための引数の型が正しくありません');
-			}
-			/*
-				 if (!(this.args[i].isArray != myFuncs[this.funcName].params[i].isArray)) {
-				 throw new RuntimeError(this.first_line, '手続き '+funcName+' を呼び出すための引数の型が正しくありません');
-				 }
-				 */
-		}
-		myFuncs[func].exec(param);
-		watingReturns.push(this);
-		throw this;
+    if (myFuncs[func] == undefined) {
+      throw new RuntimeError(this.first_line, func+"という関数はありません");
+    }
+    if (myFuncs[func].params.length != param.length) {
+      throw new RuntimeError(this.first_line, '関数 '+func+' を呼び出すための引数の数が正しくありません');
+    }
+    for (let i=0; i<param.length; i++) {
+      if (!this.isCorrectDatatype(i)) {
+        throw new RuntimeError(this.first_line, '関数 '+func+' を呼び出すための引数の型が正しくありません');
+      }
+    }
+    myFuncs[func].exec(param);
+    watingReturns.push(this);
+    throw this;
 	}
 	getCode()
 	{
@@ -1175,6 +1179,7 @@ class DefineFunction extends Statement {
           case '実数':   param['datatype'] = FloatValue;   break;
           case '文字列': param['datatype'] = StringValue;  break;
           case '真偽':   param['datatype'] = BooleanValue; break;
+          case '配列':   param['datatype'] = ArrayValue;   break;
         }
       }
       this.params = params;
@@ -1194,8 +1199,8 @@ class DefineFunction extends Statement {
     }
     const vt = new varTable();
     const params = this.params;
-    for (const param of params) {
-      vt.vars[param['varname']] = args.pop().getValue();
+    for (let i=0; i<params.length; i++) {
+      vt.vars[params[i]['varname']] = args[i].getValue();
     }
     varTables.push(vt);
     stack.push({statementlist: this.statementlist, index: 0});
@@ -1212,7 +1217,7 @@ class ReturnStatement extends Statement {
       watingReturns.pop().returnValue = this.value.getValue();
       throw this;
     } else {
-      throw new RuntimeError(this.first_line, '数の戻り値が一致していません');
+      throw new RuntimeError(this.first_line, '戻り値の型が一致していません');
     }
   }
 }
