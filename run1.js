@@ -1457,16 +1457,6 @@ var CallStep = function (_Statement2) {
 	}
 
 	_createClass(CallStep, [{
-		key: "isCorrectDatatype",
-		value: function isCorrectDatatype(i) {
-			var fn = this.funcName;
-			var args = this.args;
-			if (args[i].getValue() instanceof myFuncs[fn].params[i]['datatype'] || args[i].getValue() instanceof ArrayValue && myFuncs[fn].params[i]['isArray']) {
-				return true;
-			}
-			return false;
-		}
-	}, {
 		key: "run",
 		value: function run() {
 			var fn = this.funcName;
@@ -1588,8 +1578,6 @@ var notReturnedFunction = function (_Statement6) {
 
 	return notReturnedFunction;
 }(Statement);
-
-
 
 var DefinitionStatement = function (_Statement7) {
 	_inherits(DefinitionStatement, _Statement7);
@@ -2089,7 +2077,9 @@ var If = function (_Statement14) {
 		value: function run() {
 			_get(If.prototype.__proto__ || Object.getPrototypeOf(If.prototype), "run", this).call(this);
 			if (this.condition.getValue() instanceof BooleanValue) {
-				if (this.condition.getValue().value) code[0].stack.unshift({ statementlist: this.state1, index: 0 });else if (this.state2 != null) code[0].stack.unshift({ statementlist: this.state2, index: 0 });
+				if (this.condition.getValue().value) code[0].stack.unshift({ statementlist: this.state1, index: 0 });else if (this.state2 != null) {
+					if (this.state2 instanceof If) this.state2.run();else code[0].stack.unshift({ statementlist: this.state2, index: 0 });
+				}
 			} else throw new RuntimeError(this.first_line, "もし〜の構文で条件式が使われていません");
 		}
 	}]);

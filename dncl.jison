@@ -81,6 +81,7 @@ UNDEFINED		"《"[^》]*"》"
 "を入力する"			{return 'を入力する';}
 "もし"					{return 'もし';}
 "ならば"				{return 'ならば';}
+"を実行し"{Comma}"そうでなく"		{return 'を実行し，そうでなく';}
 "を実行し"{Comma}"そうでなければ"			{return 'を実行し，そうでなければ';}
 "を実行する"			{return 'を実行する';}
 "を実行"				{return 'を実行する';}
@@ -257,6 +258,8 @@ CallStatement
 IfStatement
 	: 'もし' e 'ならば' 'NEWLINE' statementlist 'を実行する' 'NEWLINE'
 	{$$ = new If($2,$5,null, new Location(@1, @6));}
+	| 'もし' e 'ならば' 'NEWLINE' statementlist 'を実行し，そうでなく' IfStatement
+	{$$ = new If($2,$5,$7, new Location(@1,@5));}
 	| 'もし' e 'ならば' 'NEWLINE' statementlist 'を実行し，そうでなければ' 'NEWLINE' statementlist 'を実行する' 'NEWLINE'
 	{$$ = new If($2,$5,$8, new Location(@1, @9));}
 	;
